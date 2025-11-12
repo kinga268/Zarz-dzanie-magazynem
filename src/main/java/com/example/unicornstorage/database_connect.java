@@ -10,26 +10,29 @@ public class database_connect {
     @FXML
     protected void onConnect() {
             //String username = "notif";
-            String username = "wiktorowski_projekt-programowanie";
-            //String password = "notif";
-            String password = "m33g08nfg3";
-            String dbname = "wiktorowski_projekt-programowanie";
+            String username = "root";
+            String password = "";
+            String dbname = "projekt";
             //String servername = "jdbc:mysql://192.168.236.120:3306/" + dbname;
-            String servername = "jdbc:mariadb://sql4.5v.pl:3306/" + dbname;
+            String servername = "jdbc:mariadb://127.0.0.1:3306/"+dbname;
             System.out.println("test");
             Connection connection = null;
             try {
 //                Class.forName("com.mysql.cj.jdbc.Driver");
+                System.out.println("test");
                 connection = DriverManager.getConnection(servername, username, password);
+                System.out.println("test");
                 Statement statement;
                 statement = connection.createStatement();//połączenie z bazą danych
                 ResultSet resultSet;
                 resultSet = statement.executeQuery("SELECT * FROM magazyn");
 
-                String ilosc;
-                String id;
-                String nazwa;
-                String opis;
+                String ilosc="";
+                String id="";
+                String nazwa="";
+                String opis="";
+                String a="";
+
                 // wyświetlenie w terminalu
                 while (resultSet.next()) {
 
@@ -37,8 +40,10 @@ public class database_connect {
                     ilosc = resultSet.getString("ilosc");
                     nazwa = resultSet.getString("nazwa");
                     opis = resultSet.getString("opis").trim();
-                    System.out.println("Title : " + id + " Note : " + ilosc + " Time : " + nazwa + " Date : " + opis);
+                    a=a+("Title : " + id + " Note : " + ilosc + " Time : " + nazwa + " Date : " + opis+"\n");
+
                 }
+                this.exeptionListener.setText(a);
                 resultSet.close();
                 statement.close();
                 connection.close();
