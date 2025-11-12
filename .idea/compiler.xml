@@ -9,5 +9,8 @@
         <module name="UnicornStorage" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="UnicornStorage" target="21" />
+    </bytecodeTargetLevel>
   </component>
 </project>
