@@ -2,8 +2,11 @@ package com.example.unicornstorage;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import java.io.*;
 
 import java.sql.*;
+import java.util.Scanner;
+
 public class database_connect {
     @FXML
     private Label exeptionListener;
@@ -12,13 +15,18 @@ public class database_connect {
             //String username = "notif";
             String username = "root";
             String password = "";
-            String dbname = "projekt";
+            String dbname = null;
             //String servername = "jdbc:mysql://192.168.236.120:3306/" + dbname;
-            String servername = "jdbc:mariadb://127.0.0.1:3306/"+dbname;
+            String servername = null;
             System.out.println("test");
             Connection connection = null;
+
             try {
-//                Class.forName("com.mysql.cj.jdbc.Driver");
+                Scanner scanner = new Scanner(new File("config.txt"));
+                dbname = scanner.nextLine();
+                servername = scanner.nextLine();
+                servername = servername + dbname;
+                //                Class.forName("com.mysql.cj.jdbc.Driver");
                 System.out.println("test");
                 connection = DriverManager.getConnection(servername, username, password);
                 System.out.println("test");
