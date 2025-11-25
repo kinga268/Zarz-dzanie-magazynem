@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" prefHeight="271.0" prefWidth="385.0" spacing="20.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.unicornstorage.database_connect">
+<VBox alignment="CENTER" prefHeight="529.0" prefWidth="894.0" spacing="20.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.unicornstorage.database_connect">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
-   <TabPane centerShape="false" prefHeight="638.0" prefWidth="345.0" tabClosingPolicy="UNAVAILABLE">
-     <tabs>
-       <Tab text="Untitled Tab 2">
-         <content>
-           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                  <children>
-                      <Button layoutX="144.0" layoutY="56.0" mnemonicParsing="false" onAction="#onConnect" text="Connect" />
-                      <Label fx:id="exeptionListener" layoutX="165.0" layoutY="40.0" text="Label" />
-                  </children></AnchorPane>
-         </content>
-       </Tab>
-     </tabs>
-   </TabPane>
+   <children>
+      <TableView fx:id="tableMagazyn" prefHeight="515.0" prefWidth="854.0">
+        <columns>
+          <TableColumn fx:id="colId" prefWidth="42.399993896484375" text="id" />
+          <TableColumn fx:id="colIlosc" prefWidth="56.79998779296875" text="Ilość" />
+            <TableColumn fx:id="colNazwa" prefWidth="219.20001220703125" text="Nazwa" />
+            <TableColumn fx:id="colProducent" prefWidth="96.0" text="Producent" />
+            <TableColumn fx:id="colKategoria" prefWidth="99.20001220703125" text="Kategoria" />
+            <TableColumn fx:id="colPodkategoria" prefWidth="82.4000244140625" text="Podkategoria" />
+            <TableColumn fx:id="colOpis" prefWidth="198.39996337890625" text="Opis" />
+        </columns>
+      </TableView>
+   </children>
 </VBox>
