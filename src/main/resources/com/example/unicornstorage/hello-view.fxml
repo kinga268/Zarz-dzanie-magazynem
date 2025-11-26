@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.unicornstorage.HelloController">
+<VBox alignment="CENTER" prefHeight="529.0" prefWidth="894.0" spacing="20.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.unicornstorage.database_connect">
     <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
-
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
+   <children>
+      <TableView fx:id="tableMagazyn" prefHeight="515.0" prefWidth="854.0">
+        <columns>
+          <TableColumn fx:id="colId" prefWidth="42.399993896484375" text="id" />
+          <TableColumn fx:id="colIlosc" prefWidth="56.79998779296875" text="Ilość" />
+            <TableColumn fx:id="colNazwa" prefWidth="219.20001220703125" text="Nazwa" />
+            <TableColumn fx:id="colProducent" prefWidth="96.0" text="Producent" />
+            <TableColumn fx:id="colKategoria" prefWidth="99.20001220703125" text="Kategoria" />
+            <TableColumn fx:id="colPodkategoria" prefWidth="82.4000244140625" text="Podkategoria" />
+            <TableColumn fx:id="colOpis" prefWidth="198.39996337890625" text="Opis" />
+        </columns>
+      </TableView>
+   </children>
 </VBox>
