@@ -20,28 +20,28 @@ import java.sql.Statement;
 public class database_connect
 {
     @FXML
-    private TableView<MagazynItem> tableMagazyn;
+    private TableView<Tabela_glowna> tableMagazyn;
 
     @FXML
-    private TableColumn<MagazynItem, Integer> colId;
+    private TableColumn<Tabela_glowna, Integer> colId;
 
     @FXML
-    private TableColumn<MagazynItem, Integer> colIlosc;
+    private TableColumn<Tabela_glowna, Integer> colIlosc;
 
     @FXML
-    private TableColumn<MagazynItem, String> colNazwa;
+    private TableColumn<Tabela_glowna, String> colNazwa;
 
     @FXML
-    private TableColumn<MagazynItem, String> colProducent;
+    private TableColumn<Tabela_glowna, String> colProducent;
 
     @FXML
-    private TableColumn<MagazynItem, String> colKategoria;
+    private TableColumn<Tabela_glowna, String> colKategoria;
 
     @FXML
-    private TableColumn<MagazynItem, String> colPodkategoria;
+    private TableColumn<Tabela_glowna, String> colPodkategoria;
 
     @FXML
-    private TableColumn<MagazynItem, String> colOpis;
+    private TableColumn<Tabela_glowna, String> colOpis;
 
     @FXML
     private void initialize()
@@ -75,10 +75,10 @@ public class database_connect
         loadData();
     }
 
-    private void configureWrappingColumn(TableColumn<MagazynItem, String> col)
+    private void configureWrappingColumn(TableColumn<Tabela_glowna, String> col)
     {
         col.setCellFactory(c -> {
-            TableCell<MagazynItem, String> cell = new TableCell<>();
+            TableCell<Tabela_glowna, String> cell = new TableCell<>();
             Text text = new Text();
 
             text.wrappingWidthProperty().bind(col.widthProperty().subtract(10));
@@ -89,44 +89,59 @@ public class database_connect
             return cell;
         });
     }
+    private void query(String q1)
+            {
+                try
+                {
+                    ResultSet resultSet = statement.executeQuery(q1);
 
-    private void loadData()
+                    while (resultSet.next())
+                    {
+                        String id = resultSet.getString("id");
+                        String ilosc = resultSet.getString("ilosc");
+                        String ilosc_ostrzezenie = resultSet.getString("ilosc_ostrzezenie");
+                        String nazwa = resultSet.getString("nazwa");
+                        String producent = resultSet.getString("producent");
+                        String kategoria = resultSet.getString("kategoria");
+                        String podkategoria = resultSet.getString("podkategoria");
+                        String opis = resultSet.getString("opis");
+
+                        dane.add(new Tabela_glowna(
+                                id, ilosc,ilosc_ostrzezenie, nazwa,
+                                producent, kategoria,
+                                podkategoria, opis
+                        ));
+                    }
+
+                    resultSet.close();
+                    statement.close();
+                    connection.close();
+
+                    tableMagazyn.setItems(dane);
+                }
+                catch (Exception e){
+                    System.out.println(e);
+
+                }
+            }
+    Connection connection;
+    Statement statement;
+    ObservableList<Tabela_glowna> dane;
+    public void loadData()
     {
-        String username = "root";
-        String password = "";
-        String dbname = "projekt";
-        String servername = "jdbc:mariadb://127.0.0.1:3306/" + dbname;
+        String username = "grupa3_L04";
+        String password = "HasloGrupa3_L04!";
+        String dbname = "Teams_3_L04";
+        String servername = "jdbc:mariadb://130.61.119.119:3306/" + dbname;
 
-        ObservableList<MagazynItem> dane = FXCollections.observableArrayList();
+        dane = FXCollections.observableArrayList();
 
         try
         {
-            Connection connection = DriverManager.getConnection(servername, username, password);
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM magazyn");
+            connection = DriverManager.getConnection(servername, username, password);
+             statement = connection.createStatement();
+             query("SELECT * FROM  magazyn");
 
-            while (resultSet.next())
-            {
-                int id = resultSet.getInt("id");
-                int ilosc = resultSet.getInt("ilosc");
-                String nazwa = resultSet.getString("nazwa");
-                String producent = resultSet.getString("producent");
-                String kategoria = resultSet.getString("kategoria");
-                String podkategoria = resultSet.getString("podkategoria");
-                String opis = resultSet.getString("opis");
-
-                dane.add(new MagazynItem(
-                        id, ilosc, nazwa,
-                        producent, kategoria,
-                        podkategoria, opis
-                ));
-            }
-
-            resultSet.close();
-            statement.close();
-            connection.close();
-
-            tableMagazyn.setItems(dane);
 
             // po ustawieniu danych dopasuj szerokości kolumn
             Platform.runLater(this::autoResizeColumns);
@@ -149,13 +164,13 @@ public class database_connect
         // colOpis nie ruszamy – dostanie całą pozostałą szerokość
     }
 
-    private void resizeToContent(TableColumn<MagazynItem, ?> col, int padding)
+    private void resizeToContent(TableColumn<Tabela_glowna, ?> col, int padding)
     {
         if (col == null) return;
 
         double max = computeTextWidth(col.getText());
 
-        for (MagazynItem item : tableMagazyn.getItems())
+        for (Tabela_glowna item : tableMagazyn.getItems())
         {
             Object cellData = col.getCellData(item);
             if (cellData != null)
@@ -179,4 +194,5 @@ public class database_connect
         Text helper = new Text(text);
         return helper.getLayoutBounds().getWidth();
     }
+
 }
