@@ -12,10 +12,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Scanner;
 
 public class database_connect
 {
@@ -138,6 +140,10 @@ public class database_connect
 
         try
         {
+            Scanner scanner = new Scanner(new File("config.txt"));
+            dbname = scanner.nextLine();
+            servername = scanner.nextLine();
+            servername = servername + dbname;
             connection = DriverManager.getConnection(servername, username, password);
              statement = connection.createStatement();
              query("SELECT * FROM  magazyn");
