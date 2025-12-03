@@ -11,6 +11,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
+import javafx.scene.control.Button;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -42,6 +43,12 @@ public class database_connect
 
     @FXML
     private TableColumn<Tabela_glowna, String> colOpis;
+    @FXML
+    private Button Ostrzezenie;
+    @FXML
+    private Button Braki;
+    @FXML
+    private Button Reset;
 
     @FXML
     private void initialize()
@@ -97,9 +104,9 @@ public class database_connect
 
                     while (resultSet.next())
                     {
-                        String id = resultSet.getString("id");
-                        String ilosc = resultSet.getString("ilosc");
-                        String ilosc_ostrzezenie = resultSet.getString("ilosc_ostrzezenie");
+                        int id = resultSet.getInt("id");
+                        int ilosc = resultSet.getInt("ilosc");
+                        int ilosc_ostrzezenie = resultSet.getInt("ilosc_ostrzezenie");
                         String nazwa = resultSet.getString("nazwa");
                         String producent = resultSet.getString("producent");
                         String kategoria = resultSet.getString("kategoria");
@@ -193,6 +200,31 @@ public class database_connect
 
         Text helper = new Text(text);
         return helper.getLayoutBounds().getWidth();
+    }
+    @FXML
+    private void onOstrzezenie() {
+        ObservableList<Tabela_glowna> ostrzezenia = FXCollections.observableArrayList();
+        for (Tabela_glowna os : dane) {
+            if (os.getIlosc() <= os.getIloscOstrzezenie()) {
+                ostrzezenia.add(os);
+            }
+        }
+        tableMagazyn.setItems(ostrzezenia);
+    }
+
+    @FXML
+    private void onBraki() {
+        ObservableList<Tabela_glowna> braki = FXCollections.observableArrayList();
+        for (Tabela_glowna br : dane) {
+            if (br.getIlosc() == 0) {
+                braki.add(br);
+            }
+        }
+        tableMagazyn.setItems(braki);
+    }
+    @FXML
+    private void onReset() {
+        tableMagazyn.setItems(dane);
     }
 
 }
