@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -19,12 +18,7 @@
         <!-- PRZYCISKI OBOK SIEBIE -->
         <HBox spacing="15">
             <children>
-            <TextField />
-                <Button fx:id="Ostrzezenie" onAction="#onOstrzezenie" text="Ostrzeżenie" />
-
-                <Button fx:id="Braki" onAction="#onBraki" text="Braki" />
-
-                <Button fx:id="Reset" onAction="#onReset" text="Reset" />
+            <TextField fx:id="szukaj" />
             </children>
         </HBox>
 
