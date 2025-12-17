@@ -11,16 +11,15 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
+import javafx.scene.control.Button;
 import javafx.util.Duration;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicLong;
+import java.sql.Statement;
 
 public class database_connect
 {
@@ -49,14 +48,25 @@ public class database_connect
     private TableColumn<Tabela_glowna, String> colOpis;
 
     @FXML
+    private Button Ostrzezenie;
+
+    @FXML
+    private Button Braki;
+
+    @FXML
+    private Button Reset;
+
+    // ===== DODANE: pole wyszukiwania + debounce =====
+    @FXML
     private TextField szukaj;
 
     private final PauseTransition debounce = new PauseTransition(Duration.millis(250));
-    private final AtomicLong querySeq = new AtomicLong(0);
+    // ===============================================
 
     @FXML
     private void initialize()
     {
+        // powiązanie kolumn z danymi
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colIlosc.setCellValueFactory(new PropertyValueFactory<>("ilosc"));
         colNazwa.setCellValueFactory(new PropertyValueFactory<>("nazwa"));
@@ -65,22 +75,26 @@ public class database_connect
         colPodkategoria.setCellValueFactory(new PropertyValueFactory<>("podkategoria"));
         colOpis.setCellValueFactory(new PropertyValueFactory<>("opis"));
 
+        // centrowanie ID i ILOSC
         colId.setStyle("-fx-alignment: CENTER;");
         colIlosc.setStyle("-fx-alignment: CENTER;");
 
+        // kolumny mają wypełniać całą szerokość tabeli (reszta idzie w opis)
         tableMagazyn.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        // zmienna wysokość wierszy
         tableMagazyn.setFixedCellSize(Control.USE_COMPUTED_SIZE);
 
+        // zawijanie + automatyczna wysokość dla kolumn tekstowych
         configureWrappingColumn(colNazwa);
         configureWrappingColumn(colProducent);
         configureWrappingColumn(colKategoria);
         configureWrappingColumn(colPodkategoria);
         configureWrappingColumn(colOpis);
 
-        // Start: pełna tabela
-        loadDataAsync("");
+        loadData();
 
-        // Listener na pole szukaj
+        // ===== DODANE: listener wyszukiwania =====
         if (szukaj != null)
         {
             szukaj.textProperty().addListener((obs, oldVal, newVal) ->
@@ -89,17 +103,37 @@ public class database_connect
                 debounce.setOnFinished(e ->
                 {
                     String fraza = (newVal == null) ? "" : newVal.trim();
-                    loadDataAsync(fraza);
+
+                    // jeśli puste -> wróć do pełnej listy (tak jak reset)
+                    if (fraza.isEmpty())
+                    {
+                        tableMagazyn.setItems(dane);
+                        return;
+                    }
+
+                    // kwerenda po nazwa/producent/kategoria/podkategoria
+                    // proste zabezpieczenie apostrofu, bo tu używasz Statement
+                    String safe = fraza.replace("'", "''");
+
+                    String q =
+                            "SELECT * FROM magazyn " +
+                                    "WHERE LOWER(nazwa) LIKE LOWER('%" + safe + "%') " +
+                                    "   OR LOWER(producent) LIKE LOWER('%" + safe + "%') " +
+                                    "   OR LOWER(kategoria) LIKE LOWER('%" + safe + "%') " +
+                                    "   OR LOWER(podkategoria) LIKE LOWER('%" + safe + "%')";
+
+                    // nie używamy Twojego query(), bo ono zamyka connection/statement
+                    loadDataSearch(q);
                 });
                 debounce.playFromStart();
             });
         }
+        // ==========================================
     }
 
     private void configureWrappingColumn(TableColumn<Tabela_glowna, String> col)
     {
-        col.setCellFactory(c ->
-        {
+        col.setCellFactory(c -> {
             TableCell<Tabela_glowna, String> cell = new TableCell<>();
             Text text = new Text();
 
@@ -107,135 +141,149 @@ public class database_connect
             text.textProperty().bind(cell.itemProperty());
 
             cell.setGraphic(text);
-            cell.setPrefHeight(Control.USE_COMPUTED_SIZE);
+            cell.setPrefHeight(Region.USE_COMPUTED_SIZE);
             return cell;
         });
     }
 
-    private void loadDataAsync(String fraza)
+    // ===== Twoja funkcja query (zostawiam jak jest) =====
+    private void query(String q1)
     {
-        long mySeq = querySeq.incrementAndGet();
-
-        new Thread(() ->
+        try
         {
-            ObservableList<Tabela_glowna> wynik = loadDataFromDb(fraza);
+            dane.clear();
+            ResultSet resultSet = statement.executeQuery(q1);
 
-            Platform.runLater(() ->
+            while (resultSet.next())
             {
-                // jeśli w międzyczasie przyszło nowsze zapytanie – ignoruj stare
-                if (mySeq != querySeq.get())
-                {
-                    return;
-                }
+                String id = resultSet.getString("id");
+                String ilosc = resultSet.getString("ilosc");
+                String ilosc_ostrzezenie = resultSet.getString("ilosc_ostrzezenie");
+                String nazwa = resultSet.getString("nazwa");
+                String producent = resultSet.getString("producent");
+                String kategoria = resultSet.getString("kategoria");
+                String podkategoria = resultSet.getString("podkategoria");
+                String opis = resultSet.getString("opis");
 
-                tableMagazyn.setItems(wynik);
+                dane.add(new Tabela_glowna(
+                        id, ilosc, ilosc_ostrzezenie, nazwa,
+                        producent, kategoria,
+                        podkategoria, opis
+                ));
+            }
 
-                // dopasuj prefWidth (bez sztywnego maxWidth/minWidth, żeby OPIS brał resztę)
-                Platform.runLater(this::autoResizeColumns);
-            });
-        }, "db-search-thread").start();
+
+
+            tableMagazyn.setItems(dane);
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
     }
 
-    private ObservableList<Tabela_glowna> loadDataFromDb(String fraza)
+    Connection connection;
+    Statement statement;
+    ObservableList<Tabela_glowna> dane;
+
+    public void loadData()
     {
         String username = "grupa3_L04";
         String password = "HasloGrupa3_L04!";
         String dbname = "Teams_3_L04";
         String servername = "jdbc:mariadb://130.61.119.119:3306/" + dbname;
 
-        ObservableList<Tabela_glowna> dane = FXCollections.observableArrayList();
+        dane = FXCollections.observableArrayList();
 
         try
         {
-            // config.txt: 1 linia = dbname, 2 linia = prefix url (np. jdbc:mariadb://IP:3306/)
-//            Scanner scanner = new Scanner(new File("config.txt"));
-//            dbname = scanner.nextLine();
-//            servername = scanner.nextLine();
-//            servername = servername + dbname;
+            connection = DriverManager.getConnection(servername, username, password);
+            statement = connection.createStatement();
+            query("SELECT * FROM  magazyn");
 
-            String sql =
-                    "SELECT id, ilosc, ilosc_ostrzezenie, nazwa, producent, kategoria, podkategoria, opis " +
-                            "FROM magazyn " +
-                            "WHERE (? = '') " +
-                            "   OR (LOWER(nazwa) LIKE LOWER(?) " +
-                            "   OR  LOWER(producent) LIKE LOWER(?) " +
-                            "   OR  LOWER(kategoria) LIKE LOWER(?) " +
-                            "   OR  LOWER(podkategoria) LIKE LOWER(?)) " +
-                            "ORDER BY id";
-
-            String like = "%" + fraza + "%";
-
-            try (Connection connection = DriverManager.getConnection(servername, username, password);
-                 PreparedStatement ps = connection.prepareStatement(sql))
-            {
-                ps.setString(1, fraza);
-                ps.setString(2, like);
-                ps.setString(3, like);
-                ps.setString(4, like);
-                ps.setString(5, like);
-
-                try (ResultSet resultSet = ps.executeQuery())
-                {
-                    while (resultSet.next())
-                    {
-                        String id = safeString(resultSet.getString("id"));
-                        String ilosc = safeString(resultSet.getString("ilosc"));
-                        String ilosc_ostrzezenie = safeString(resultSet.getString("ilosc_ostrzezenie"));
-                        String nazwa = safeString(resultSet.getString("nazwa"));
-                        String producent = safeString(resultSet.getString("producent"));
-                        String kategoria = safeString(resultSet.getString("kategoria"));
-                        String podkategoria = safeString(resultSet.getString("podkategoria"));
-                        String opis = safeString(resultSet.getString("opis"));
-
-                        dane.add(new Tabela_glowna(
-                                id, ilosc, ilosc_ostrzezenie, nazwa,
-                                producent, kategoria,
-                                podkategoria, opis
-                        ));
-                    }
-                }
-            }
+            // po ustawieniu danych dopasuj szerokości kolumn
+            Platform.runLater(this::autoResizeColumns);
         }
         catch (Exception exception)
         {
             exception.printStackTrace();
         }
-
-        return dane;
     }
 
-    private String safeString(String s)
+    // ===== DODANE: osobne ładowanie wyników wyszukiwania (bez zamykania globalnych connection/statement) =====
+    private void loadDataSearch(String sql)
     {
-        return (s == null) ? "" : s;
-    }
+        String username = "grupa3_L04";
+        String password = "HasloGrupa3_L04!";
+        String dbname = "Teams_3_L04";
+        String servername = "jdbc:mariadb://130.61.119.119:3306/" + dbname;
 
-    private void autoResizeColumns()
-    {
-        // ustawiamy TYLKO prefWidth dla kolumn poza OPIS, żeby OPIS zgarnął resztę przy CONSTRAINED
-        setPrefToContent(colId);
-        setPrefToContent(colIlosc);
-        setPrefToContent(colNazwa);
-        setPrefToContent(colProducent);
-        setPrefToContent(colKategoria);
-        setPrefToContent(colPodkategoria);
+        ObservableList<Tabela_glowna> wyniki = FXCollections.observableArrayList();
 
-        // colOpis zostaje elastyczny (bierze resztę)
-    }
-
-    private void setPrefToContent(TableColumn<Tabela_glowna, ?> col)
-    {
-        double max = 0;
-
-        for (int i = 0; i < tableMagazyn.getItems().size(); i++)
+        try (Connection c = DriverManager.getConnection(servername, username, password);
+             Statement s = c.createStatement();
+             ResultSet rs = s.executeQuery(sql))
         {
-            Object cellData = col.getCellData(i);
-            String text = (cellData == null) ? "" : cellData.toString();
-            max = Math.max(max, computeTextWidth(text));
+            while (rs.next())
+            {
+                String id = rs.getString("id");
+                String ilosc = rs.getString("ilosc");
+                String ilosc_ostrzezenie = rs.getString("ilosc_ostrzezenie");
+                String nazwa = rs.getString("nazwa");
+                String producent = rs.getString("producent");
+                String kategoria = rs.getString("kategoria");
+                String podkategoria = rs.getString("podkategoria");
+                String opis = rs.getString("opis");
+
+                wyniki.add(new Tabela_glowna(
+                        id, ilosc, ilosc_ostrzezenie, nazwa,
+                        producent, kategoria,
+                        podkategoria, opis
+                ));
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
         }
 
-        // mała szerokość minimalna, żeby nie było mikroskopijne
-        double finalWidth = Math.max(60, max + 30);
+        tableMagazyn.setItems(wyniki);
+        Platform.runLater(this::autoResizeColumns);
+    }
+    // =========================================================================================================
+
+    // dopasowanie szerokości kolumn do najdłuższego tekstu (oprócz OPIS)
+    private void autoResizeColumns()
+    {
+        resizeToContent(colId, 16);          // trochę paddingu
+        resizeToContent(colIlosc, 16);
+        resizeToContent(colNazwa, 24);
+        resizeToContent(colProducent, 24);
+        resizeToContent(colKategoria, 24);
+        resizeToContent(colPodkategoria, 24);
+        // colOpis nie ruszamy – dostanie całą pozostałą szerokość
+    }
+
+    private void resizeToContent(TableColumn<Tabela_glowna, ?> col, int padding)
+    {
+        if (col == null) return;
+
+        double max = computeTextWidth(col.getText());
+
+        for (Tabela_glowna item : tableMagazyn.getItems())
+        {
+            Object cellData = col.getCellData(item);
+            if (cellData != null)
+            {
+                double w = computeTextWidth(cellData.toString());
+                if (w > max) max = w;
+            }
+        }
+
+        double finalWidth = max + padding;
+        col.setMinWidth(finalWidth);
         col.setPrefWidth(finalWidth);
+        col.setMaxWidth(finalWidth);
     }
 
     private double computeTextWidth(String text)
@@ -247,6 +295,28 @@ public class database_connect
         return helper.getLayoutBounds().getWidth();
     }
 
+    @FXML
+    private void onOstrzezenie()
+    {
+        query("SELECT * FROM magazyn WHERE ilosc < ilosc_ostrzezenie AND ilosc > 0"
+        );
+    }
+    @FXML
+    private void onBraki()
+    {
+        query("SELECT * FROM magazyn WHERE ilosc = 0"
+        );
+    }
 
 
+
+    @FXML
+    private void onReset()
+    {
+        query("SELECT * FROM magazyn"
+        );
+    }
 }
+
+
+
