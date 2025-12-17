@@ -18,6 +18,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import javafx.collections.transformation.FilteredList;
+import javafx.scene.control.TextField;
+
 public class database_connect
 {
     @FXML
@@ -134,6 +137,21 @@ public class database_connect
     Connection connection;
     Statement statement;
     ObservableList<Tabela_glowna> dane;
+
+    @FXML
+    private TextField searchField;
+
+    private FilteredList<Tabela_glowna> filteredData;
+
+    private enum FilterType
+    {
+        ALL,
+        OSTRZEZENIA,
+        BRAKI
+    }
+
+    private FilterType currentFilter = FilterType.ALL;
+
     public void loadData()
     {
         String username = "grupa3_L04";
