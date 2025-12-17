@@ -8,36 +8,31 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" prefHeight="529.0" prefWidth="894.0" spacing="20.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.unicornstorage.database_connect">
+<VBox alignment="CENTER" prefHeight="529.0" prefWidth="894.0" spacing="20.0" xmlns="http://javafx.com/javafx/25"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.unicornstorage.database_connect">
 
     <padding>
-        <Insets bottom="20" left="20" right="20" top="20" />
+        <Insets bottom="20" left="20" right="20" top="20"/>
     </padding>
 
-    <children>
+    <!-- PRZYCISKI OBOK SIEBIE -->
+    <HBox spacing="15">
+        <TextField fx:id="szukaj"/>
+        <Button fx:id="Ostrzezenie" mnemonicParsing="false" onAction="#onOstrzezenie" text="Ostrzeżenia"/>
+        <Button fx:id="Braki" mnemonicParsing="false" onAction="#onBraki" text="Braki"/>
+        <Button fx:id="Reset" mnemonicParsing="false" onAction="#onReset" text="Reset"/>
+    </HBox>
 
-        <!-- PRZYCISKI OBOK SIEBIE -->
-        <HBox spacing="15">
-            <children>
-            <TextField fx:id="szukaj" />
-            <Button fx:id="Ostrzezenie" mnemonicParsing="false" onAction="#onOstrzezenie" text="Ostrzeżenia" />
-            <Button fx:id="Braki" mnemonicParsing="false" onAction="#onBraki" text="Braki" />
-            <Button fx:id="Reset" mnemonicParsing="false" onAction="#onReset" text="Reset" />
-            </children>
-        </HBox>
-
-        <TableView fx:id="tableMagazyn" prefHeight="515" prefWidth="854">
-            <columns>
-                <TableColumn fx:id="colId" text="Id" />
-                <TableColumn fx:id="colIlosc" text="Ilość" />
-                <TableColumn fx:id="colNazwa" text="Nazwa" />
-                <TableColumn fx:id="colProducent" text="Producent" />
-                <TableColumn fx:id="colKategoria" text="Kategoria" />
-                <TableColumn fx:id="colPodkategoria" text="Podkategoria" />
-                <TableColumn fx:id="colOpis" text="Opis" />
-            </columns>
-        </TableView>
-
-    </children>
+    <TableView fx:id="tableMagazyn" prefHeight="515" prefWidth="854">
+        <columns>
+            <TableColumn fx:id="colId" text="Id"/>
+            <TableColumn fx:id="colIlosc" text="Ilość"/>
+            <TableColumn fx:id="colNazwa" text="Nazwa"/>
+            <TableColumn fx:id="colProducent" text="Producent"/>
+            <TableColumn fx:id="colKategoria" text="Kategoria"/>
+            <TableColumn fx:id="colPodkategoria" text="Podkategoria"/>
+            <TableColumn fx:id="colOpis" text="Opis"/>
+        </columns>
+    </TableView>
 
 </VBox>

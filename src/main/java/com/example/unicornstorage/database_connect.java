@@ -47,14 +47,6 @@ public class database_connect
     @FXML
     private TableColumn<Tabela_glowna, String> colOpis;
 
-    @FXML
-    private Button Ostrzezenie;
-
-    @FXML
-    private Button Braki;
-
-    @FXML
-    private Button Reset;
 
     // ===== DODANE: pole wyszukiwania + debounce =====
     @FXML
