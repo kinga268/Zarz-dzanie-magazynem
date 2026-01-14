@@ -2,9 +2,9 @@ package com.example.unicornstorage;
 
 public class Tabela_glowna
 {
-    private int id;
-    private int ilosc;
-    private int iloscOstrzezenie;
+    private String id;
+    private String ilosc;
+    private String iloscOstrzezenie;
     private String ilosc_ostrzezenie;
     private String nazwa;
     private String producent;
@@ -12,7 +12,7 @@ public class Tabela_glowna
     private String podkategoria;
     private String opis;
 
-    public Tabela_glowna(int id, int ilosc, int iloscOstrzezenie, String nazwa,
+    public Tabela_glowna(String id, String ilosc, String iloscOstrzezenie, String nazwa,
                          String producent, String kategoria,
                          String podkategoria, String opis)
     {
@@ -26,16 +26,16 @@ public class Tabela_glowna
         this.opis = opis;
     }
 
-    public int getId()
+    public String getId()
     {
         return id;
     }
 
-    public int getIlosc()
+    public String getIlosc()
     {
         return ilosc;
     }
-    public int getIloscOstrzezenie(){
+    public String getIloscOstrzezenie(){
         return iloscOstrzezenie;
     }
 
