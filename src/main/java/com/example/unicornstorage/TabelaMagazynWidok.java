@@ -65,7 +65,7 @@ public class TabelaMagazynWidok {
         resizeToContent(table, colProducent, 24);
         resizeToContent(table, colKategoria, 24);
         resizeToContent(table, colPodkategoria, 24);
-        // colOpis celowo pominięta
+       
     }
 
     private static void resizeToContent(
