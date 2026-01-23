@@ -35,7 +35,7 @@ public class database_connect
     @FXML
     private TableColumn<Tabela_glowna, String> colOpis;
 
-    // 🔍 SEARCH
+    
     @FXML
     private TextField search;
     private final PauseTransition debounce =
@@ -58,7 +58,7 @@ public class database_connect
 
         loadData();
 
-        // 🔁 AUTO SEARCH
+        
         if (search != null)
         {
             search.textProperty().addListener((obs, oldVal, newVal) ->
@@ -143,7 +143,7 @@ public class database_connect
         }
     }
 
-    // --- PRZYCISKI ---
+   
     @FXML
     private void onOstrzezenie()
     {
