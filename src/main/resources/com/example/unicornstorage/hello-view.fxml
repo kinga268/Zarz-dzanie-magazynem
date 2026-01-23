@@ -21,7 +21,7 @@
 
     <children>
 
-        <!-- PRZYCISKI OBOK SIEBIE -->
+        
         <HBox spacing="15">
             <children>
                 <Button fx:id="Ostrzezenie"
